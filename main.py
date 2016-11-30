@@ -57,55 +57,15 @@ def main(_):
             dcgan.train(FLAGS)
         else:
             list_val = [11,16,21,22,33,36,38,53,59,92]
-	    print'Selecting a Evaluation mode \n'
-	    print '1:'
-	    print '2:'
-            print '3:'
-	    print '4: Estimating Normal maps according to Light directions and object tilt angles'
-            VAL_OPTION =4
+	    print '1: Estimating Normal maps from arbitary obejcts \n'
+            print '2: EStimating Normal maps according to only object tilt angles(Light direction is fixed(EX:3) \n'
+	    print '3: Estimating Normal maps according to Light directions and object tilt angles \n'
+	    x = input('Selecting a Evaluation mode:')
+	   
+            VAL_OPTION = int(x)
 		           
  
-	    if VAL_OPTION ==1:
-	    	model = 'DCGAN.model-10000'
-	        dcgan.load(FLAGS.checkpoint_dir,model)
-                list_val = [11,16,21,22,33,36,38,53,59,92]
-                for idx in range(len(list_val)):
-		    os.makedirs(os.path.join('L1_loss_result','%03d' %list_val[idx]))
-                    for idx2 in range(1,10): 
-                        print("Selected material %03d/%d" % (list_val[idx],idx2))
-                        img = '/research2/IR_normal_small/save%03d/%d' % (list_val[idx],idx2)
-                        input_ = scipy.misc.imread(img+'/3.bmp').astype(float)
-                        gt_ = scipy.misc.imread('/research2/IR_normal_small/save016/1/12_Normal.bmp').astype(float)
-                        input_ = scipy.misc.imresize(input_,[600,800])
-			input_  = input_/255.0 -1.0 # normalize -1 ~1
-                        gt_ = scipy.misc.imresize(gt_,[600,800])
-                        #input_ = input_[240:840,515:1315]
-                        #gt_ = gt_[240:840,515:1315]
-                        input_ = np.reshape(input_,(1,600,800,1)) 
-                        gt_ = np.reshape(gt_,(1,600,800,3)) 
-                        input_ = np.array(input_).astype(np.float32)
-                        gt_ = np.array(gt_).astype(np.float32)
-                        start_time = time.time() 
-                        sample = sess.run(dcgan.sampler, feed_dict={dcgan.ir_images: input_})
-                        print('time: %.8f' %(time.time()-start_time))     
-                        # normalization #
-                        sample = np.squeeze(sample).astype(np.float32)
-                        gt_ = np.squeeze(gt_).astype(np.float32)
-
-                        output = np.zeros((600,800,3)).astype(np.float32)
-                        output[:,:,0] = sample[:,:,0]/(np.sqrt(np.power(sample[:,:,0],2) + np.power(sample[:,:,1],2) + np.power(sample[:,:,2],2)))
-                        output[:,:,1] = sample[:,:,1]/(np.sqrt(np.power(sample[:,:,0],2) + np.power(sample[:,:,1],2) + np.power(sample[:,:,2],2)))
-                        output[:,:,2] = sample[:,:,2]/(np.sqrt(np.power(sample[:,:,0],2) + np.power(sample[:,:,1],2) + np.power(sample[:,:,2],2)))
-   
-                        output[output ==inf] = 0.0
-                        sample = (output+1.)/2.
-			os.makedirs(os.path.join('L1_loss_result','%03d/%d' %(list_val[idx],idx2)))
-                        savename = './L1_loss_result/%03d/%d/single_normal_L1_%s.bmp' % (list_val[idx],idx2,model)
-
-                        scipy.misc.imsave(savename, sample)
-
-            
-            elif VAL_OPTION ==2: # arbitary dataset 
+            if VAL_OPTION ==1: # arbitary dataset 
                 print("Computing arbitary dataset ")
 		trained_models = glob.glob(os.path.join(FLAGS.checkpoint_dir,FLAGS.dataset,'DCGAN.model*'))
 		trained_models  = natsorted(trained_models)
@@ -144,7 +104,7 @@ def main(_):
 		    savename = savepath + '/normal_' + name +'.bmp' 
                     scipy.misc.imsave(savename, sample)
 
-	    elif VAL_OPTION ==3: # light source fixed
+	    elif VAL_OPTION ==2: # light source fixed
                 list_val = [11,16,21,22,33,36,38,53,59,92]
 		save_files = glob.glob(os.path.join(FLAGS.checkpoint_dir,FLAGS.dataset,'DCGAN.model*'))
 		save_files  = natsorted(save_files)
@@ -187,20 +147,20 @@ def main(_):
 			    savename = os.path.join(savepath, '%03d/%d/single_normal_%s.bmp' % (list_val[idx],idx2,model))
 			    scipy.misc.imsave(savename, sample)
 
-	    elif VAL_OPTION ==4: # depends on light sources 
+	    elif VAL_OPTION ==3: # depends on light sources 
                 list_val = [11,16,21,22,33,36,38,53,59,92]
 		selec_model=[-2]
 		mean_nir = -0.3313 #-1~1
 		save_files = glob.glob(os.path.join(FLAGS.checkpoint_dir,FLAGS.dataset,'DCGAN.model*'))
 		save_files  = natsorted(save_files)
 		savepath ='./Deconv_L1_result'
-		pdb.set_trace()
 		if not os.path.exists(os.path.join(savepath)):
 		    os.makedirs(os.path.join(savepath))
                 for m in range(len(selec_model)):
 		    model = save_files[selec_model[m]]
 		    model = model.split('/')
 		    model = model[-1]
+                    print('Load model: %s \n' %model)
 		    pdb.set_trace()
 		    dcgan.load(FLAGS.checkpoint_dir,model)
 	            for idx in range(len(list_val)):
