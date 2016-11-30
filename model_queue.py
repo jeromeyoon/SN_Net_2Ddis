@@ -51,8 +51,8 @@ class DCGAN(object):
 	"""
 	net  = networks(self.num_block,self.batch_size,self.df_dim)
 	self.G = net.generator(self.ir_images)
-	self.D = net.discriminator(self.normal_images)
-	self.D_  = net.discriminator(self.G,reuse=True)
+	self.D = net.discriminator(tf.concat(-1,[self.normal_images,self.ir_images]))
+	self.D_  = net.discriminator(tf.concat(-1,[self.G,self.ir_images]),reuse=True)
 
 	# generated surface normal
         self.d_loss_real = binary_cross_entropy_with_logits(tf.ones_like(self.D), self.D)
