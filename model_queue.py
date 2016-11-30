@@ -122,7 +122,7 @@ class DCGAN(object):
         	     start_time = time.time()
 		     _,d_loss_real,d_loss_fake =self.sess.run([d_optim,self.d_loss_real,self.d_loss_fake])
 		     _,g_loss,L1_loss =self.sess.run([g_optim,self.g_loss,self.L1_loss])
-		     print("Epoch: [%2d] [%4d/%4d] time: %4.4f g_loss: %.6f L1_loss:%.4f d_loss_real: %4.f d_loss_fake:%.4f" \
+		     print("Epoch: [%2d] [%4d/%4d] time: %4.4f g_loss: %.6f L1_loss:%.4f d_loss_real: %.4f d_loss_fake:%.4f" \
 		     % (epoch, idx, batch_idxs,time.time() - start_time,g_loss,L1_loss,d_loss_real,d_loss_fake))
 		     sum_L1 += L1_loss 	
 		     sum_g += g_loss	
