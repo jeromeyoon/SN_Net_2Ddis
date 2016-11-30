@@ -56,19 +56,16 @@ def main(_):
         if FLAGS.is_train:
             dcgan.train(FLAGS)
         else:
-            OPTION = 2 # for validation
             list_val = [11,16,21,22,33,36,38,53,59,92]
+	    print'Selecting a Evaluation mode \n'
+	    print '1:'
+	    print '2:'
+            print '3:'
+	    print '4: Estimating Normal maps according to Light directions and object tilt angles'
             VAL_OPTION =4
-            """
-            if OPTION == 1:
-                data = json.load(open("/research2/IR_normal_small/json/traininput_single_224_ori_small.json"))
-                data_label = json.load(open("/research2/IR_normal_small/json/traingt_single_224_ori_small.json"))
-            
-            elif OPTION == 2:
-                data = json.load(open("/research2/IR_normal_small/json/testinput_single_224_ori_small.json"))
-                data_label = json.load(open("/research2/IR_normal_small/json/testgt_single_224_ori_small.json"))
-            """
-            if VAL_OPTION ==1:
+		           
+ 
+	    if VAL_OPTION ==1:
 	    	model = 'DCGAN.model-10000'
 	        dcgan.load(FLAGS.checkpoint_dir,model)
                 list_val = [11,16,21,22,33,36,38,53,59,92]
