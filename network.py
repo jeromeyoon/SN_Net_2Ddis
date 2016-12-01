@@ -20,14 +20,14 @@ class networks(object):
     def discriminator(self, image, reuse=False):
 	if reuse:
             tf.get_variable_scope().reuse_variables()    
-        h0 = lrelu(conv2d(image, self.df_dim, k_h=3,k_w=3,d_h=2,d_w=2,name='d_h0_conv')) #output size 32 x32
+        h0 = lrelu(conv2d(image, self.df_dim, k_h=1,k_w=1,d_h=2,d_w=2,name='d_h0_conv')) #output size 32 x32
 	d_bn1 = batch_norm(self.batch_size,name='d_bn1')
-        h1 = lrelu(d_bn1(conv2d(h0, self.df_dim*2, k_h=3,k_w=3,d_h=2,d_w=2,name='d_h1_conv'))) #output size16 x16
+        h1 = lrelu(d_bn1(conv2d(h0, self.df_dim*2, k_h=1,k_w=1,d_h=2,d_w=2,name='d_h1_conv'))) #output size16 x16
 	d_bn2 = batch_norm(self.batch_size,name='d_bn2')
-        h2 = lrelu(d_bn2(conv2d(h1, self.df_dim*4, k_h=3,k_w=3,name='d_h2_conv'))) #output size 16 x16
+        h2 = lrelu(d_bn2(conv2d(h1, self.df_dim*4, k_h=1,k_w=1,name='d_h2_conv'))) #output size 16 x16
 	d_bn3 = batch_norm(self.batch_size,name='d_bn3')
-        h3 = lrelu(d_bn3(conv2d(h2, self.df_dim*8,k_h=3,k_w=3,name='d_h3_conv'))) #output size 16x16
-        h4 = conv2d(h3,1,k_w=3,k_h=3,name='d_h4_conv')
+        h3 = lrelu(d_bn3(conv2d(h2, self.df_dim*8,k_h=1,k_w=1,name='d_h3_conv'))) #output size 16x16
+        h4 = conv2d(h3,1,k_w=1,k_h=1,name='d_h4_conv')
         return tf.nn.sigmoid(h4)
     def sampler(self,nir):
 	tf.get_variable_scope().reuse_variables()
