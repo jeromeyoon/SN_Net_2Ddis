@@ -4,8 +4,6 @@ from glob import glob
 import numpy as np
 from numpy import inf
 import tensorflow as tf
-import pdb
-#from tensorflow.python.ops.script_ops import *
 from ops import *
 from utils import *
 from random import shuffle
@@ -42,7 +40,7 @@ class DCGAN(object):
 		print ' using queue loading'
 		self.ir_image_single = tf.placeholder(tf.float32,shape=self.ir_image_shape)
 		self.normal_image_single = tf.placeholder(tf.float32,shape=self.normal_image_shape)
-		q = tf.FIFOQueue(1000,[tf.float32,tf.float32],[[self.ir_image_shape[0],self.ir_image_shape[1],1],[self.normal_image_shape[0],self.normal_image_shape[1],3]])
+		q = tf.FIFOQueue(10000,[tf.float32,tf.float32],[[self.ir_image_shape[0],self.ir_image_shape[1],1],[self.normal_image_shape[0],self.normal_image_shape[1],3]])
 		self.enqueue_op = q.enqueue([self.ir_image_single,self.normal_image_single])
 		self.ir_images, self.normal_images = q.dequeue_many(self.batch_size)
 	"""
@@ -93,9 +91,8 @@ class DCGAN(object):
         data_label = json.load(open("/research2/ECCV_journal/with_light/json/traingt.json"))
         datalist =[data[idx] for idx in xrange(0,len(data))]
         labellist =[data_label[idx] for idx in xrange(0,len(data))]
-	shuffle(datalist)
-	shuffle(labellist)
-
+	X = range(len(datalist))
+	shuffle(X)
         list_val = [11,16,21,22,33,36,38,53,59,92]
 
 
@@ -104,7 +101,7 @@ class DCGAN(object):
 	    coord = tf.train.Coordinator()
             num_thread =32
             for i in range(num_thread):
- 	        t = threading.Thread(target=self.load_and_enqueue,args=(coord,datalist,labellist,i,num_thread))
+ 	        t = threading.Thread(target=self.load_and_enqueue,args=(coord,datalist,labellist,X,i,num_thread))
 	 	t.start()
 
 	if self.use_queue:
@@ -185,13 +182,13 @@ class DCGAN(object):
             return False
 
 	    
-    def load_and_enqueue(self,coord,file_list,label_list,idx=0,num_thread=1):
+    def load_and_enqueue(self,coord,file_list,label_list,X,idx=0,num_thread=1):
 	count =0;
 	length = len(file_list)
 	while not coord.should_stop():
 	    i = (count*num_thread + idx) % length;
-            input_img = scipy.misc.imread(file_list[i]).reshape([224,224,1]).astype(np.float32)
-	    gt_img = scipy.misc.imread(label_list[i]).reshape([224,224,3]).astype(np.float32)
+            input_img = scipy.misc.imread(file_list[X[i]]).reshape([224,224,1]).astype(np.float32)
+	    gt_img = scipy.misc.imread(label_list[X[i]]).reshape([224,224,3]).astype(np.float32)
 	    input_img = input_img/127.5 -1.
 	    gt_img = gt_img/127.5 -1.
 	    rand_x = np.random.randint(64,224-64)

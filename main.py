@@ -108,7 +108,7 @@ def main(_):
                 list_val = [11,16,21,22,33,36,38,53,59,92]
 		save_files = glob.glob(os.path.join(FLAGS.checkpoint_dir,FLAGS.dataset,'DCGAN.model*'))
 		save_files  = natsorted(save_files)
-		savepath ='./RMSS_ang_scale_loss_result'
+		savepath ='./L2_loss_result'
 		for model_idx in range(0,len(save_files),2):
 		    model = save_files[model_idx]
 		    model = model.split('/')
