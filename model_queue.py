@@ -40,7 +40,7 @@ class DCGAN(object):
 		print ' using queue loading'
 		self.ir_image_single = tf.placeholder(tf.float32,shape=self.ir_image_shape)
 		self.normal_image_single = tf.placeholder(tf.float32,shape=self.normal_image_shape)
-		q = tf.FIFOQueue(10000,[tf.float32,tf.float32],[[self.ir_image_shape[0],self.ir_image_shape[1],1],[self.normal_image_shape[0],self.normal_image_shape[1],3]])
+		q = tf.FIFOQueue(1000,[tf.float32,tf.float32],[[self.ir_image_shape[0],self.ir_image_shape[1],1],[self.normal_image_shape[0],self.normal_image_shape[1],3]])
 		self.enqueue_op = q.enqueue([self.ir_image_single,self.normal_image_single])
 		self.ir_images, self.normal_images = q.dequeue_many(self.batch_size)
 	"""
@@ -60,7 +60,7 @@ class DCGAN(object):
         self.g_loss = binary_cross_entropy_with_logits(tf.ones_like(self.D_), self.D_)
         self.gen_loss = self.g_loss + self.L1_loss
 
-	self.saver = tf.train.Saver(max_to_keep=0)
+	self.saver = tf.train.Saver(max_to_keep=10)
 	t_vars = tf.trainable_variables()
 	self.d_vars =[var for var in t_vars if 'd_' in var.name]
 	self.g_vars =[var for var in t_vars if 'g_' in var.name]
@@ -71,7 +71,7 @@ class DCGAN(object):
 
         global_step = tf.Variable(0,name='global_step',trainable=False)
         global_step1 = tf.Variable(0,name='global_step1',trainable=False)
-	
+
 	d_optim = tf.train.AdamOptimizer(config.d_learning_rate,beta1=config.beta1) \
                           .minimize(self.d_loss, global_step=global_step,var_list=self.d_vars)
         g_optim = tf.train.AdamOptimizer(config.g_learning_rate,beta1=config.beta1) \
@@ -99,7 +99,7 @@ class DCGAN(object):
 	if self.use_queue:
 	    # creat thread
 	    coord = tf.train.Coordinator()
-            num_thread =32
+            num_thread =2
             for i in range(num_thread):
  	        t = threading.Thread(target=self.load_and_enqueue,args=(coord,datalist,labellist,X,i,num_thread))
 	 	t.start()
@@ -110,6 +110,8 @@ class DCGAN(object):
 	        batch_idxs = min(len(data), config.train_size)/config.batch_size
 		sum_L1 = 0.0
 		sum_g =0.0
+		sum_d_real =0.0
+		sum_d_fake =0.0
 		if epoch ==0:
 		    train_log = open(os.path.join("logs",'train_%s.log' %config.dataset),'w')
 		else:
@@ -122,8 +124,10 @@ class DCGAN(object):
 		     print("Epoch: [%2d] [%4d/%4d] time: %4.4f g_loss: %.6f L1_loss:%.4f d_loss_real: %.4f d_loss_fake:%.4f" \
 		     % (epoch, idx, batch_idxs,time.time() - start_time,g_loss,L1_loss,d_loss_real,d_loss_fake))
 		     sum_L1 += L1_loss 	
-		     sum_g += g_loss	
-		train_log.write('epoch %06d mean_g %.6f  mean_L1 %.6f\n' %(epoch,sum_g/(batch_idxs),sum_L1/(batch_idxs)))
+		     sum_g += g_loss
+		     sum_d_real += d_loss_real
+		     sum_d_fake += d_loss_fake	
+		train_log.write('epoch %06d mean_g %.6f  mean_L1 %.6f d_real %.6f d_fake %.6f \n' %(epoch,sum_g/(batch_idxs),sum_L1/(batch_idxs),sum_d_real/batch_idxs,sum_d_fake/batch_idxs))
 		train_log.close()
 	        self.save(config.checkpoint_dir,global_step)
 
