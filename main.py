@@ -76,7 +76,6 @@ def main(_):
 		model = trained_models[4]
 		model = model.split('/')
 		model = model[-1]
-	        pdb.set_trace()
 		dcgan.load(FLAGS.checkpoint_dir,model)
                 for idx in xrange(len(fulldatapath)):
 		    input_= scipy.misc.imread(fulldatapath[idx]).astype(float)
@@ -162,7 +161,6 @@ def main(_):
 		    model = model[-1]
                     print('Load model: %s \n' %model)
 		    dcgan.load(FLAGS.checkpoint_dir,model)
-		    pdb.set_trace()
 	            for idx in range(len(list_val)):
 		        if not os.path.exists(os.path.join(savepath,'%03d' %list_val[idx])):
 		            os.makedirs(os.path.join(savepath,'%03d' %list_val[idx]))
