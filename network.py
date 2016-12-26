@@ -8,17 +8,17 @@ class networks(object):
 	self.df_dim = df_dim
     def generator(self,nir):
 	g_bn0 = batch_norm(self.batch_size,name='g_bn0')
-        h0 =tf.nn.relu(g_bn0(conv2d(nir,self.df_dim,name='g_nir0')))
+        h0 = lrelu(g_bn0(conv2d(nir,self.df_dim,name='g_nir0')))
 	g_bn1 = batch_norm(self.batch_size,name='g_bn1')
-        block =tf.nn.relu(g_bn1(conv2d(h0,self.df_dim*2,k_h=1,k_w=1,name='g_nir1')))
-	for ii in range(self.num_block):
-            g_bn_block = batch_norm(self.batch_size,name='g_bn2_%s' %ii)
-            block =tf.nn.relu(g_bn_block(conv2d(block,self.df_dim*4,k_h=3,k_w=3,name='g_nir2_%s' %ii)))
-        g_bn_block = batch_norm(self.batch_size,name='g_bn3')
-        block =tf.nn.relu(g_bn_block(conv2d(block,self.df_dim*2,k_h=1,k_w=1,name='g_nir3')))
-        final =conv2d(block,3,name='g_end')
-        #final =deconv2d(block,[self.batch_size,nir.get_shape().as_list()[1],nir.get_shape().as_list()[2],3],name='g_end',with_w=False)
-	return tf.nn.tanh(final)
+        h1 = lrelu(g_bn1(conv2d(h0,self.df_dim*2,k_h=3,k_w=3,name='g_nir1')))
+	g_bn2 = batch_norm(self.batch_size,name='g_bn2')
+        h2 = lrelu(g_bn2(conv2d(h1,self.df_dim*4,k_h=3,k_w=3,name='g_nir2')))
+	g_bn3 = batch_norm(self.batch_size,name='g_bn3')
+        h3 = lrelu(g_bn3(conv2d(h2,self.df_dim*4,k_h=3,k_w=3,name='g_nir3')))
+	g_bn4 = batch_norm(self.batch_size,name='g_bn4')
+        h4 = lrelu(g_bn4(conv2d(h2,self.df_dim*2,k_h=3,k_w=3,name='g_nir4')))
+        h5 =conv2d(h4,3,k_h=3,k_w=3,name='g_nir5')
+	return tf.nn.tanh(h5)
 
     def discriminator(self, image, reuse=False):
 	if reuse:

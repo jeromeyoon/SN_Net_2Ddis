@@ -21,9 +21,9 @@ flags.DEFINE_float("g_learning_rate", 0.0002, "Learning rate of for adam [0.0002
 flags.DEFINE_float("d_learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", np.inf, "The size of train images [np.inf]")
-flags.DEFINE_integer("batch_size", 64, "The size of batch images [64]")
+flags.DEFINE_integer("batch_size", 32, "The size of batch images [64]")
 flags.DEFINE_integer("image_size", 108, "The size of image to use (will be center cropped) [108]")
-flags.DEFINE_string("dataset", "sn_net_dis_pair", "The name of dataset [celebA, mnist, lsun]")
+flags.DEFINE_string("dataset", "1225_sn_net_pair", "The name of dataset [celebA, mnist, lsun]")
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_string("sample_dir", "output", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", False, "True for training, False for testing [False]")
@@ -181,7 +181,7 @@ def main(_):
 			        mean_mask = mean_nir * mask
 			        #input_ = input_ - mean_mask	
 			        start_time = time.time() 
-			        sample = sess.run(dcgan.sampler, feed_dict={dcgan.ir_images: input_})
+			        sample = sess.run(dcgan.G, feed_dict={dcgan.ir_images: input_})
 			        print('time: %.8f' %(time.time()-start_time))     
 			        # normalization #
 			        sample = np.squeeze(sample).astype(np.float32)
